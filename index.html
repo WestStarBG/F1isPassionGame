@@ -3,302 +3,311 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>F1 Прогнози 2026</title>
+    <title>F1 Fantasy 2026 - Official Hub</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --primary-bg: #121212;
-            --card-bg: #1e1e1e;
-            --accent-color: #e10600; /* F1 Red */
+            --primary-bg: #0b0b0b;
+            --card-bg: #1a1a1a;
+            --accent-color: #e10600;
             --text-color: #ffffff;
             --gold: #ffd700;
-            --gray-text: #b3b3b3;
+            --up-color: #00ff00;
+            --down-color: #ff4d4d;
         }
 
         body {
             font-family: 'Segoe UI', Roboto, sans-serif;
             background-color: var(--primary-bg);
             color: var(--text-color);
-            margin: 0;
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            margin: 0; padding: 10px;
+            display: flex; flex-direction: column; align-items: center;
         }
 
-        header {
-            text-align: center;
-            margin-bottom: 20px;
-            border-bottom: 3px solid var(--accent-color);
-            width: 100%;
-            max-width: 900px;
-        }
-
+        header { text-align: center; margin-bottom: 20px; width: 100%; max-width: 1000px; }
+        
         .nav-buttons {
-            margin-bottom: 20px;
-            display: flex;
-            gap: 10px;
+            display: flex; flex-wrap: wrap; justify-content: center;
+            gap: 10px; margin-bottom: 20px;
         }
 
         button {
-            padding: 12px 25px;
-            cursor: pointer;
-            background: var(--card-bg);
-            color: white;
-            border: 1px solid #444;
-            border-radius: 8px;
-            font-weight: bold;
-            transition: 0.3s;
+            padding: 12px 18px; cursor: pointer; background: var(--card-bg);
+            color: white; border: 1px solid #444; border-radius: 8px;
+            font-weight: bold; transition: 0.3s;
         }
 
-        button:hover, button.active {
-            background: var(--accent-color);
-            border-color: var(--accent-color);
-        }
+        button:hover, button.active { background: var(--accent-color); border-color: var(--accent-color); }
 
         .container {
-            width: 100%;
-            max-width: 900px;
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            box-sizing: border-box;
-        }
-
-        .controls {
-            margin-bottom: 25px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+            width: 100%; max-width: 1000px; background: var(--card-bg);
+            border-radius: 12px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-sizing: border-box; margin-bottom: 20px;
         }
 
         select {
-            padding: 12px;
-            border-radius: 8px;
-            background: #2d2d2d;
-            color: white;
-            border: 1px solid var(--accent-color);
-            font-size: 1rem;
-            cursor: pointer;
+            padding: 10px; background: #222; color: white;
+            border: 1px solid var(--accent-color); border-radius: 5px;
+            margin-bottom: 15px; width: 100%; max-width: 300px;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #333; font-size: 0.9rem; }
+        th { color: var(--accent-color); text-transform: uppercase; letter-spacing: 1px; }
+
+        .bonus-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px; margin-top: 20px;
         }
 
-        th, td {
-            padding: 15px 10px;
-            text-align: left;
-            border-bottom: 1px solid #333;
+        .bonus-card {
+            background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px;
+            border-left: 4px solid var(--gold);
         }
 
-        th {
-            color: var(--accent-color);
-            text-transform: uppercase;
-            font-size: 0.85rem;
-            letter-spacing: 1px;
-        }
-
-        .total-col {
-            font-weight: bold;
-            color: var(--gold);
-            text-align: right;
-        }
-
-        .points-val {
-            text-align: right;
-        }
-
+        .winner-tag { background: var(--gold); color: black; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; }
         .hidden { display: none; }
-
-        .race-header {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 20px;
-            padding: 10px;
-            background: rgba(255,255,255,0.03);
-            border-radius: 8px;
-        }
-
-        .flag-img {
-            width: 50px;
-            height: auto;
-            border-radius: 4px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-        }
-
-        tr:last-child td { border: none; }
-
-        @media (max-width: 600px) {
-            th, td { padding: 10px 5px; font-size: 0.85rem; }
-            .flag-img { width: 35px; }
-        }
+        .flag-img { width: 40px; border-radius: 3px; vertical-align: middle; margin-right: 10px; }
+        #timer { font-size: 1.2rem; color: var(--gold); font-weight: bold; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>🏁 F1 ШАМПИОНАТ 2026</h1>
+        <div id="timer">Зареждане на таймера...</div>
+        <h1>🏎️ F1 HUB: ПРОГНОЗИ 2026</h1>
     </header>
 
     <div class="nav-buttons">
-        <button onclick="showTab('general')" id="btn-general" class="active">Генерално</button>
-        <button onclick="showTab('races')" id="btn-races">По състезания</button>
+        <button onclick="showTab('race-results')" id="btn-race-results" class="active">1. По състезание</button>
+        <button onclick="showTab('predictions')" id="btn-predictions">2. Предварителни прогнози</button>
+        <button onclick="showTab('general')" id="btn-general">3. Генерално класиране</button>
+        <button onclick="showTab('charts')" id="btn-charts">4. Графика & Анализ</button>
     </div>
 
-    <div id="general-tab" class="container">
-        <h2>🏆 Общо класиране</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th style="width: 50px;">Поз.</th>
-                    <th>Участник</th>
-                    <th style="text-align: right;">Точки</th>
-                </tr>
-            </thead>
-            <tbody id="general-body"></tbody>
-        </table>
-    </div>
-
-    <div id="races-tab" class="container hidden">
-        <div class="controls">
-            <label for="race-select">Избери състезание от календара:</label>
-            <select id="race-select" onchange="renderRaceResults()">
-                </select>
+    <div id="race-results-tab" class="container">
+        <select id="select-race-results" onchange="renderRaceResults()"></select>
+        <div id="race-header-info">
+            <h2><img src="" id="res-flag" class="flag-img"><span id="res-title"></span></h2>
+            <p>🏁 Победител в състезанието: <span id="race-winner" class="winner-tag"></span></p>
         </div>
-
-        <div class="race-header" id="race-header-info">
-            <img src="" id="current-flag" class="flag-img" alt="Flag">
-            <h2 id="current-race-title" style="margin:0;">Гран При</h2>
-        </div>
-
         <table>
             <thead>
                 <tr>
                     <th>Участник</th>
-                    <th class="points-val">Предварителна</th>
-                    <th class="points-val">След Квалиф.</th>
-                    <th class="total-col">ОБЩО</th>
+                    <th>Предварителна</th>
+                    <th>След Квалиф.</th>
+                    <th style="text-align:right; color: var(--gold);">ОБЩО</th>
                 </tr>
             </thead>
             <tbody id="race-results-body"></tbody>
         </table>
     </div>
 
+    <div id="predictions-tab" class="container hidden">
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <select id="pred-race-select" onchange="renderPredictions()"></select>
+            <select id="pred-type-select" onchange="renderPredictions()">
+                <option value="Предварителна - Преди уикенда да започне">Предварителна</option>
+                <option value="След квалификация">След квалификация</option>
+            </select>
+        </div>
+        <h3>Топ 10 Прогнози</h3>
+        <div style="overflow-x: auto;">
+            <table id="top10-table">
+                <thead id="top10-head"></thead>
+                <tbody id="top10-body"></tbody>
+            </table>
+        </div>
+        <h3>Бонус Прогнози</h3>
+        <div class="bonus-grid" id="bonus-container"></div>
+    </div>
+
+    <div id="general-tab" class="container hidden">
+        <h2>🏆 Общо класиране и движение</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Поз.</th>
+                    <th>Δ</th>
+                    <th>Участник</th>
+                    <th>Австралия</th>
+                    <th>Китай</th>
+                    <th style="text-align:right; color: var(--gold);">Общо</th>
+                </tr>
+            </thead>
+            <tbody id="general-body"></tbody>
+        </table>
+    </div>
+
+    <div id="charts-tab" class="container hidden">
+        <h2>📈 Прогрес на точките</h2>
+        <div style="height: 400px; width: 100%;">
+            <canvas id="mainChart"></canvas>
+        </div>
+    </div>
+
     <script>
-        // Данни от твоя файл (База: Австралия)
-        const participants = ["Славчо", "Георги", "Радослав", "Александър", "Димитър", "Ангел"];
+        // ДАННИ ОТ ЕКСЕЛСКИТЕ ТАБЛИЦИ
+        const participants = ["Радослав", "Георги", "Александър", "Славчо", "Димитър", "Ангел"];
         
-        const raceData = {
-            "Австралия": { 
-                "Славчо": [32, 12], "Георги": [20, 19], "Радослав": [12, 25], 
-                "Александър": [19, 15], "Димитър": [17, 16], "Ангел": [0, 0] 
+        const calendar = [
+            { id: "au", name: "Австралия", winner: "Джордж Ръсел" },
+            { id: "cn", name: "Китай", winner: "Кими Антонели" },
+            { id: "jp", name: "Япония", winner: "-" },
+            { id: "bh", name: "Бахрейн", winner: "-" }
+        ];
+
+        // Данни от "Резултати от състезания"
+        const pointsData = {
+            "Австралия": {
+                "Радослав": [17, 19], "Георги": [25, 16], "Александър": [14, 9],
+                "Славчо": [15, 29], "Димитър": [16, 17], "Ангел": [0, 0]
+            },
+            "Китай": {
+                "Радослав": [24, 35], "Георги": [24, 23], "Александър": [22, 27],
+                "Славчо": [14, 20], "Димитър": [0, 0], "Ангел": [15, 18]
             }
         };
 
-        // Официален календар за 2026
-        const f1Calendar2026 = [
-            { id: "au", name: "Австралия" },
-            { id: "cn", name: "Китай" },
-            { id: "jp", name: "Япония" },
-            { id: "bh", name: "Бахрейн" },
-            { id: "sa", name: "Саудитска Арабия" },
-            { id: "us", name: "Маями" },
-            { id: "ca", name: "Канада" },
-            { id: "mc", name: "Монако" },
-            { id: "es", name: "Барселона" },
-            { id: "at", name: "Австрия" },
-            { id: "gb", name: "Великобритания" },
-            { id: "be", name: "Белгия" },
-            { id: "hu", name: "Унгария" },
-            { id: "nl", name: "Нидерландия" },
-            { id: "it", name: "Италия" },
-            { id: "es", name: "Мадрид" },
-            { id: "az", name: "Азербайджан" },
-            { id: "sg", name: "Сингапур" },
-            { id: "us", name: "САЩ (Остин)" },
-            { id: "mx", name: "Мексико" },
-            { id: "br", name: "Бразилия" },
-            { id: "us", name: "Лас Вегас" },
-            { id: "qa", name: "Катар" },
-            { id: "ae", name: "Абу Даби" }
+        // Данни от "Отговори от формуляр 1" (Примерна извадка)
+        const detailedPredictions = [
+            { name: "Радо", race: "1. GP Australia", type: "След квалификация", top10: ["Ръсел", "Антонели", "Люклер", "Хамилтън", "Норис", "Верстапен", "Пиастри", "Хаджар", "Гасли", "Беърман"], bonus: ["Пиастри", "Верстапен", "Верстапен", "Бортолето"] },
+            { name: "Сашко", race: "2. GP China", type: "След квалификация", top10: ["Ръсел", "Антонели", "Хамилтън", "Люклер", "Пиастри", "Норис", "Верстапен", "Хаджар", "Гасли", "Хулкенберг"], bonus: ["Антонели", "Строл", "Ръсел", "Хулкенберг"] }
+            // Тук могат да се добавят всички останали редове
         ];
 
         function init() {
-            const select = document.getElementById('race-select');
-            f1Calendar2026.forEach(race => {
-                let option = document.createElement('option');
-                option.value = race.name;
-                option.setAttribute('data-flag', race.id);
-                option.text = "ГП на " + race.name;
-                select.appendChild(option);
+            const resSelect = document.getElementById('select-race-results');
+            const predSelect = document.getElementById('pred-race-select');
+            
+            calendar.forEach(r => {
+                let opt1 = new Option("ГП на " + r.name, r.name);
+                let opt2 = new Option("ГП на " + r.name, r.name);
+                resSelect.add(opt1);
+                predSelect.add(opt2);
             });
 
-            renderGeneralStandings();
+            startTimer();
             renderRaceResults();
+            renderGeneral();
+            renderPredictions();
+            initChart();
         }
 
-        function renderGeneralStandings() {
-            let totals = {};
-            participants.forEach(p => totals[p] = 0);
-
-            Object.values(raceData).forEach(race => {
-                participants.forEach(p => {
-                    totals[p] += (race[p][0] + race[p][1]);
-                });
-            });
-
-            const sorted = Object.entries(totals).sort((a, b) => b[1] - a[1]);
-            const body = document.getElementById('general-body');
-            body.innerHTML = "";
-
-            sorted.forEach((item, index) => {
-                body.innerHTML += `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td>${item[0]} ${index === 0 ? '👑' : ''}</td>
-                        <td class="points-val total-col">${item[1]}</td>
-                    </tr>
-                `;
-            });
+        function startTimer() {
+            const target = new Date("March 27, 2026 06:30:00").getTime();
+            setInterval(() => {
+                const now = new Date().getTime();
+                const d = target - now;
+                const days = Math.floor(d / (86400000));
+                const hours = Math.floor((d % 86400000) / 3600000);
+                document.getElementById("timer").innerHTML = `Следващо: ГП на Китай 🇨🇳 (FP1) след ${days}д ${hours}ч`;
+            }, 1000);
         }
 
         function renderRaceResults() {
-            const select = document.getElementById('race-select');
-            const selectedRace = select.value;
-            const flagCode = select.options[select.selectedIndex].getAttribute('data-flag');
-            
-            document.getElementById('current-race-title').innerText = "Гран При на " + selectedRace;
-            document.getElementById('current-flag').src = `https://flagcdn.com/w80/${flagCode}.png`;
-            
+            const race = document.getElementById('select-race-results').value;
+            const info = calendar.find(c => c.name === race);
+            document.getElementById('res-flag').src = `https://flagcdn.com/w80/${info.id}.png`;
+            document.getElementById('res-title').innerText = "Гран При на " + race;
+            document.getElementById('race-winner').innerText = info.winner;
+
             const body = document.getElementById('race-results-body');
             body.innerHTML = "";
-
-            const data = raceData[selectedRace] || null;
-
+            
+            const data = pointsData[race] || {};
             participants.forEach(p => {
-                const pre = data ? data[p][0] : 0;
-                const qualy = data ? data[p][1] : 0;
-                const total = pre + qualy;
-
-                body.innerHTML += `
-                    <tr>
-                        <td>${p}</td>
-                        <td class="points-val">${data ? pre : "-"}</td>
-                        <td class="points-val">${data ? qualy : "-"}</td>
-                        <td class="total-col">${data ? total : "-"}</td>
-                    </tr>
-                `;
+                const pts = data[p] || [0, 0];
+                body.innerHTML += `<tr>
+                    <td>${p}</td>
+                    <td>${pts[0]}</td>
+                    <td>${pts[1]}</td>
+                    <td style="text-align:right; font-weight:bold;">${pts[0] + pts[1]}</td>
+                </tr>`;
             });
         }
 
-        function showTab(tab) {
-            document.getElementById('general-tab').classList.toggle('hidden', tab !== 'general');
-            document.getElementById('races-tab').classList.toggle('hidden', tab !== 'races');
-            document.getElementById('btn-general').classList.toggle('active', tab === 'general');
-            document.getElementById('btn-races').classList.toggle('active', tab === 'races');
+        function renderGeneral() {
+            const body = document.getElementById('general-body');
+            body.innerHTML = "";
+            
+            // Изчисляване на общо (Спрямо Ексел: Радослав 96, Георги 86...)
+            const totals = [
+                { name: "Радослав", r1: 37, r2: 59, total: 96, trend: "up" },
+                { name: "Георги", r1: 39, r2: 47, total: 86, trend: "neutral" },
+                { name: "Александър", r1: 34, r2: 49, total: 83, trend: "up" },
+                { name: "Славчо", r1: 44, r2: 34, total: 78, trend: "down" },
+                { name: "Димитър", r1: 33, r2: 0, total: 33, trend: "neutral" },
+                { name: "Ангел", r1: 0, r2: 33, total: 33, trend: "neutral" }
+            ].sort((a,b) => b.total - a.total);
+
+            totals.forEach((u, i) => {
+                let icon = u.trend === "up" ? '<span style="color:var(--up-color)">▲</span>' : 
+                           u.trend === "down" ? '<span style="color:var(--down-color)">▼</span>' : "●";
+                body.innerHTML += `<tr>
+                    <td>${i+1}</td>
+                    <td>${icon}</td>
+                    <td>${u.name}</td>
+                    <td>${u.r1}</td>
+                    <td>${u.r2}</td>
+                    <td style="text-align:right; font-weight:bold;">${u.total}</td>
+                </tr>`;
+            });
+        }
+
+        function renderPredictions() {
+            const race = document.getElementById('pred-race-select').value;
+            const type = document.getElementById('pred-type-select').value;
+            const container = document.getElementById('bonus-container');
+            const body = document.getElementById('top10-body');
+            const head = document.getElementById('top10-head');
+
+            // Филтриране на данни за избраното състезание
+            const filtered = detailedPredictions.filter(p => p.race.includes(race) && p.type === type);
+
+            if (filtered.length === 0) {
+                body.innerHTML = "<tr><td colspan='11'>Няма данни за тази прогноза</td></tr>";
+                container.innerHTML = "";
+                return;
+            }
+
+            head.innerHTML = "<tr><th>Участник</th>" + Array.from({length: 10}, (_, i) => `<th>P${i+1}</th>`).join('') + "</tr>";
+            body.innerHTML = filtered.map(f => `<tr><td>${f.name}</td>${f.top10.map(p => `<td>${p}</td>`).join('')}</tr>`).join('');
+
+            container.innerHTML = filtered.map(f => `
+                <div class="bonus-card">
+                    <strong>${f.name}</strong><br>
+                    <small>🏎️ Бърза обиколка: ${f.bonus[2]}</small><br>
+                    <small>❌ DNF: ${f.bonus[1]}</small><br>
+                    <small>⭐ Пилот на деня: ${f.bonus[0]}</small><br>
+                    <small>🚀 Bold Pick: ${f.bonus[3]}</small>
+                </div>
+            `).join('');
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('mainChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Старт', 'Австралия', 'Китай'],
+                    datasets: [
+                        { label: 'Радослав', data: [0, 37, 96], borderColor: '#00d2be', tension: 0.2 },
+                        { label: 'Георги', data: [0, 39, 86], borderColor: '#ffeb3b', tension: 0.2 },
+                        { label: 'Александър', data: [0, 34, 83], borderColor: '#e10600', tension: 0.2 },
+                        { label: 'Славчо', data: [0, 44, 78], borderColor: '#ffffff', tension: 0.2 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: {color: 'white'}}} }
+            });
+        }
+
+        function showTab(id) {
+            document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
+            document.querySelectorAll('.nav-buttons button').forEach(b => b.classList.remove('active'));
+            document.getElementById(id + '-tab').classList.remove('hidden');
+            document.getElementById('btn-' + id).classList.add('active');
         }
 
         window.onload = init;
