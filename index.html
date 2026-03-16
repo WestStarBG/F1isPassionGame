@@ -6,26 +6,29 @@
     <title>F1 PASSION GAME 2026</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --primary-bg: #0d0d0d; --card-bg: #181818; --accent: #e10600; --text: #ffffff; --gold: #ffd700; }
-        body { font-family: 'Segoe UI', sans-serif; background-color: var(--primary-bg); color: var(--text); margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
-        header h1 { font-size: 2rem; border-bottom: 4px solid var(--accent); padding-bottom: 10px; text-transform: uppercase; }
-        .nav-buttons { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; }
-        button { padding: 12px 20px; cursor: pointer; background: var(--card-bg); color: white; border: 1px solid #333; border-radius: 25px; font-weight: bold; transition: 0.3s; }
-        button.active { background: var(--accent); border-color: var(--accent); }
-        .container { width: 100%; max-width: 1100px; background: var(--card-bg); border-radius: 15px; padding: 20px; box-sizing: border-box; margin-bottom: 20px; border: 1px solid #222; }
-        select { padding: 12px; background: #252525; color: white; border: 1px solid #444; border-radius: 8px; margin-bottom: 20px; width: 100%; max-width: 400px; font-size: 1rem; display: block; margin: 0 auto 20px auto; }
+        :root { --primary-bg: #0d0d0d; --card-bg: #181818; --accent: #e10600; --text: #ffffff; --gold: #ffd700; --up: #00ff00; --down: #ff3333; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--primary-bg); color: var(--text); margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; }
+        header h1 { font-size: 2.2rem; border-bottom: 4px solid var(--accent); padding-bottom: 10px; text-transform: uppercase; margin-bottom: 30px; }
+        .nav-buttons { display: flex; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; justify-content: center; }
+        button { padding: 12px 24px; cursor: pointer; background: var(--card-bg); color: white; border: 1px solid #333; border-radius: 25px; font-weight: bold; transition: 0.3s; }
+        button.active { background: var(--accent); border-color: var(--accent); box-shadow: 0 4px 15px rgba(225, 6, 0, 0.4); }
+        .container { width: 100%; max-width: 1150px; background: var(--card-bg); border-radius: 18px; padding: 25px; box-sizing: border-box; margin-bottom: 25px; border: 1px solid #222; }
+        select { padding: 14px; background: #252525; color: white; border: 1px solid #444; border-radius: 10px; margin-bottom: 25px; width: 100%; max-width: 450px; font-size: 1.1rem; display: block; margin-left: auto; margin-right: auto; }
         .table-wrapper { width: 100%; overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #2a2a2a; }
-        th { color: #888; text-transform: uppercase; font-size: 0.75rem; }
+        th, td { padding: 14px; text-align: left; border-bottom: 1px solid #2a2a2a; font-size: 1.1rem; }
+        th { color: #888; text-transform: uppercase; font-size: 0.8rem; }
+        .pos-change { font-weight: bold; margin-left: 8px; font-size: 0.9rem; }
+        .up { color: var(--up); } .down { color: var(--down); } .same { color: #666; }
         .race-header { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 15px; }
-        .flag-img { width: 50px; border-radius: 4px; border: 1px solid #444; }
-        .winner-box { background: linear-gradient(90deg, #2c2c2c, #1a1a1a); padding: 15px; border-radius: 12px; border-left: 5px solid var(--gold); margin-bottom: 20px; text-align: center; font-size: 1.2rem; }
-        .section-title { color: var(--gold); margin: 30px 0 10px 0; border-left: 4px solid var(--accent); padding-left: 12px; font-size: 1.3rem; font-weight: bold; }
-        .bonus-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 15px; }
-        .bonus-card { background: #222; padding: 15px; border-radius: 10px; border: 1px solid #333; font-size: 0.9rem; }
-        .bonus-card h4 { margin: 0 0 10px 0; color: var(--accent); border-bottom: 1px solid #333; }
+        .flag-img { width: 55px; border-radius: 5px; border: 1px solid #444; }
+        .winner-box { background: linear-gradient(90deg, #2c2c2c, #1a1a1a); padding: 18px; border-radius: 15px; border-left: 6px solid var(--gold); margin-bottom: 25px; text-align: center; font-size: 1.3rem; }
+        .section-title { color: var(--gold); margin: 40px 0 15px 0; border-left: 5px solid var(--accent); padding-left: 15px; font-size: 1.5rem; font-weight: bold; }
+        .bonus-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; }
+        .bonus-card { background: #222; padding: 18px; border-radius: 12px; border: 1px solid #333; }
+        .bonus-card h4 { margin: 0 0 12px 0; color: var(--accent); border-bottom: 1px solid #333; padding-bottom: 5px; }
         .hidden { display: none; }
+        #chart-container { height: 450px; margin-top: 30px; background: #111; padding: 15px; border-radius: 15px; }
     </style>
 </head>
 <body>
@@ -44,10 +47,10 @@
             <img id="res-flag" class="flag-img" src="">
             <h2 id="res-title" style="margin:0"></h2>
         </div>
-        <div class="winner-box">🏆 Победител: <span id="race-winner" style="color:var(--gold); font-weight:bold;">-</span></div>
+        <div class="winner-box">🏆 ПОБЕДИТЕЛ: <span id="race-winner" style="color:var(--gold); font-weight:bold;">-</span></div>
         <div class="table-wrapper">
             <table>
-                <thead><tr><th>Участник</th><th>Предв.</th><th>Квалиф.</th><th style="text-align:right;">ОБЩО</th></tr></thead>
+                <thead><tr><th>Участник</th><th>Предварителна</th><th>След Квалиф.</th><th style="text-align:right;">ОБЩО</th></tr></thead>
                 <tbody id="race-results-body"></tbody>
             </table>
         </div>
@@ -61,11 +64,11 @@
     <div id="general-tab" class="container hidden">
         <div class="table-wrapper">
             <table>
-                <thead><tr><th>Поз.</th><th>Участник</th><th style="text-align:right;">Точки</th></tr></thead>
+                <thead><tr><th>Поз.</th><th>Участник</th><th style="text-align:right;">Общо Точки</th></tr></thead>
                 <tbody id="general-body"></tbody>
             </table>
         </div>
-        <div style="height: 350px;"><canvas id="mainChart"></canvas></div>
+        <div id="chart-container"><canvas id="mainChart"></canvas></div>
     </div>
 
     <script>
@@ -76,26 +79,22 @@
         let rawResults = [], rawPreds = [], races = [];
 
         async function fetchData() {
-            try {
-                const [r1, r2] = await Promise.all([fetch(URL_RESULTS).then(res => res.text()), fetch(URL_PREDS).then(res => res.text())]);
-                rawResults = parseCSV(r1);
-                rawPreds = parseCSV(r2);
-                const header = rawResults[0];
-                for(let i=1; i < header.length; i+=2) { if(header[i]) races.push(header[i]); }
-                initApp();
-            } catch (e) { alert("Грешка при зареждане на данните!"); }
+            const [r1, r2] = await Promise.all([fetch(URL_RESULTS).then(res => res.text()), fetch(URL_PREDS).then(res => res.text())]);
+            rawResults = parseCSV(r1); rawPreds = parseCSV(r2);
+            const header = rawResults[0];
+            for(let i=1; i < header.length; i+=2) { if(header[i]) races.push(header[i]); }
+            initApp();
         }
 
         function parseCSV(text) {
-            return text.split('\n').map(row => {
+            return text.split('\n').filter(row => row.trim()).map(row => {
                 let parts = [], current = '', inQuotes = false;
                 for (let char of row) {
                     if (char === '"') inQuotes = !inQuotes;
                     else if (char === ',' && !inQuotes) { parts.push(current.trim()); current = ''; }
                     else current += char;
                 }
-                parts.push(current.trim());
-                return parts;
+                parts.push(current.trim()); return parts;
             });
         }
 
@@ -103,38 +102,34 @@
             const rSel = document.getElementById('select-race-results');
             const pSel = document.getElementById('pred-race-select');
             races.forEach(r => { rSel.add(new Option(r, r)); pSel.add(new Option(r, r)); });
-            renderRaceResults();
-            renderGeneral();
-            renderPredictions();
+            renderRaceResults(); renderGeneral(); renderPredictions();
         }
 
         function renderRaceResults() {
             const race = document.getElementById('select-race-results').value;
             const idx = races.indexOf(race) * 2 + 1;
-            const body = document.getElementById('race-results-body');
-            body.innerHTML = "";
+            const body = document.getElementById('race-results-body'); body.innerHTML = "";
             document.getElementById('res-flag').src = `https://flagcdn.com/w160/${flagMap[race] || 'un'}.png`;
-            document.getElementById('res-title').innerText = "ГП на " + race;
+            document.getElementById('res-title').innerText = "ГП " + race;
 
             let data = [];
             for(let i=3; i < rawResults.length; i++) {
-                let row = rawResults[i]; if(!row[0]) continue;
+                let row = rawResults[i]; if(!row[0] || row[0] === "Участник") continue;
                 let p1 = parseInt(row[idx]) || 0, p2 = parseInt(row[idx+1]) || 0;
                 data.push({ n: row[0], p1, p2, t: p1 + p2 });
             }
             data.sort((a,b) => b.t - a.t);
             document.getElementById('race-winner').innerText = data[0]?.n || "-";
-            data.forEach(r => { body.innerHTML += `<tr><td>${r.n}</td><td>${r.p1}</td><td>${r.p2}</td><td style="text-align:right; font-weight:bold; color:var(--gold);">${r.t}</td></tr>`; });
+            data.forEach(r => { body.innerHTML += `<tr><td style="font-weight:bold">${r.n}</td><td>${r.p1}</td><td>${r.p2}</td><td style="text-align:right; font-weight:bold; color:var(--gold); font-size:1.2rem;">${r.t}</td></tr>`; });
         }
 
         function renderPredictions() {
             const selected = document.getElementById('pred-race-select').value;
-            const content = document.getElementById('preds-content');
-            content.innerHTML = "";
-            const types = [{ l: "📍 Предварителна прогноза", f: "Предварителна" }, { l: "🏁 След квалификация", f: "квалификация" }];
+            const content = document.getElementById('preds-content'); content.innerHTML = "";
+            const types = [{ l: "📍 Предварителна прогноза", f: "Предварителна" }, { l: "🏁 Прогноза след квалификация", f: "квалификация" }];
 
             types.forEach(type => {
-                const filtered = rawPreds.filter(row => row[2] && row[2].includes(selected) && row[3] && row[3].includes(type.f));
+                const filtered = rawPreds.filter(row => row[2]?.includes(selected) && row[3]?.includes(type.f));
                 if(filtered.length > 0) {
                     let h = `<div class="section-title">${type.l}</div><div class="table-wrapper"><table><thead><tr><th>Участник</th>`;
                     for(let i=1; i<=10; i++) h += `<th>P${i}</th>`;
@@ -144,7 +139,7 @@
                         h += `<tr><td style="font-weight:bold; color:var(--accent);">${row[1]}</td>`;
                         for(let i=4; i<=22; i+=2) h += `<td>${(row[i]||"-").split('(')[0]}</td>`;
                         h += `</tr>`;
-                        cards += `<div class="bonus-card"><h4>${row[1]}</h4><b>DotD:</b> ${row[24]}<br><b>Fast:</b> ${row[28]}<br><b>DNF:</b> ${row[26]}<br><b>Bold:</b> ${row[30]}</div>`;
+                        cards += `<div class="bonus-card"><h4>${row[1]}</h4><b>DotD:</b> ${row[24]||'-'}<br><b>Fast Lap:</b> ${row[28]||'-'}<br><b>DNF:</b> ${row[26]||'-'}<br><b>Bold:</b> ${row[30]||'-'}</div>`;
                     });
                     content.innerHTML += h + `</tbody></table></div>` + cards + `</div>`;
                 }
@@ -153,14 +148,48 @@
 
         function renderGeneral() {
             const body = document.getElementById('general-body'); body.innerHTML = "";
-            let data = [];
+            let currentRanking = [], prevRanking = [];
+
             for(let i=3; i < rawResults.length; i++) {
                 let row = rawResults[i]; if(!row[0] || row[0] === "Участник") continue;
-                let t = 0, h = [];
-                for(let j=1; j < row.length; j+=2) { t += (parseInt(row[j])||0) + (parseInt(row[j+1])||0); h.push(t); }
-                data.push({ n: row[0], t, h });
+                let total = 0, prevTotal = 0, history = [];
+                for(let j=1; j < row.length; j+=2) {
+                    let racePoints = (parseInt(row[j])||0) + (parseInt(row[j+1])||0);
+                    if(j < row.length - 2) prevTotal += racePoints; 
+                    total += racePoints; history.push(total);
+                }
+                currentRanking.push({ n: row[0], t: total, h: history });
+                prevRanking.push({ n: row[0], t: prevTotal });
             }
-            data.sort((a,b) => b.t - a.t).forEach((p, i) => { body.innerHTML += `<tr><td>${i+1}</td><td>${p.n}</td><td style="text-align:right; font-weight:bold; color:var(--gold);">${p.t}</td></tr>`; });
+
+            currentRanking.sort((a,b) => b.t - a.t);
+            prevRanking.sort((a,b) => b.t - a.t);
+
+            currentRanking.forEach((p, i) => {
+                let prevIdx = prevRanking.findIndex(pr => pr.n === p.n);
+                let diff = prevIdx - i;
+                let arrow = diff > 0 ? `<span class="pos-change up">▲ ${diff}</span>` : diff < 0 ? `<span class="pos-change down">▼ ${Math.abs(diff)}</span>` : `<span class="pos-change same">━</span>`;
+                body.innerHTML += `<tr><td>${i+1} ${arrow}</td><td style="font-weight:bold;">${p.n}</td><td style="text-align:right; font-weight:bold; color:var(--gold); font-size:1.3rem;">${p.t}</td></tr>`;
+            });
+            initChart(currentRanking);
+        }
+
+        let chart;
+        function initChart(data) {
+            const ctx = document.getElementById('mainChart').getContext('2d');
+            if(chart) chart.destroy();
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Start', ...races],
+                    datasets: data.map((p, i) => ({
+                        label: p.n, data: [0, ...p.h],
+                        borderColor: ['#e10600', '#00d2be', '#ffeb3b', '#ffffff', '#4a90e2', '#ff9800', '#9c27b0'][i % 7],
+                        tension: 0.3, borderWidth: 3, pointRadius: 4
+                    }))
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: 'white' } } }, scales: { y: { ticks: { color: '#888' }, grid: { color: '#222' } }, x: { ticks: { color: '#888' } } } }
+            });
         }
 
         function showTab(t) {
