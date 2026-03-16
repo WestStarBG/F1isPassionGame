@@ -14,13 +14,14 @@
         button { padding: 12px 24px; cursor: pointer; background: var(--card-bg); color: white; border: 1px solid #333; border-radius: 30px; font-weight: bold; transition: 0.3s; }
         button.active { background: var(--accent); border-color: var(--accent); box-shadow: 0 4px 15px rgba(225, 6, 0, 0.4); }
         .container { width: 100%; max-width: 1100px; background: var(--card-bg); border-radius: 16px; padding: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); margin-bottom: 30px; }
-        select { padding: 12px; background: #252525; color: white; border: 1px solid #444; border-radius: 8px; margin-bottom: 20px; width: 100%; max-width: 300px; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 14px; text-align: left; border-bottom: 1px solid #2a2a2a; font-size: 0.95rem; }
-        th { color: #888; text-transform: uppercase; font-size: 0.75rem; }
+        select { padding: 12px; background: #252525; color: white; border: 1px solid #444; border-radius: 8px; margin-bottom: 20px; width: 100%; max-width: 300px; font-size: 1rem; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #2a2a2a; font-size: 0.9rem; }
+        th { color: #888; text-transform: uppercase; font-size: 0.7rem; }
+        .section-title { color: var(--gold); margin: 20px 0 10px 0; border-left: 4px solid var(--accent); padding-left: 10px; font-size: 1.2rem; }
         .winner-box { background: linear-gradient(90deg, #2c2c2c, #1a1a1a); padding: 15px 25px; border-radius: 12px; border-left: 5px solid var(--gold); margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; }
-        .bonus-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 15px; margin-top: 25px; }
-        .bonus-card { background: #222; padding: 15px; border-radius: 12px; border: 1px solid #333; }
+        .bonus-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 15px; margin-bottom: 40px; }
+        .bonus-card { background: #222; padding: 15px; border-radius: 12px; border: 1px solid #333; font-size: 0.85rem; }
         .bonus-card h4 { margin: 0 0 10px 0; color: var(--accent); border-bottom: 1px solid #333; }
         .hidden { display: none; }
         .loader { padding: 50px; text-align: center; font-size: 1.2rem; color: var(--gold); }
@@ -51,22 +52,15 @@
     </div>
 
     <div id="predictions-tab" class="container hidden">
-        <div style="display: flex; gap: 10px; margin-bottom:20px;">
-            <select id="pred-race-select" onchange="renderPredictions()"></select>
-            <select id="pred-type-select" onchange="renderPredictions()">
-                <option value="Предварителна">Предварителна</option>
-                <option value="След квалификация">След квалификация</option>
-            </select>
-        </div>
-        <div style="overflow-x: auto;">
-            <table id="top10-table"><thead><tr id="top10-head"></tr></thead><tbody id="top10-body"></tbody></table>
-        </div>
-        <div class="bonus-grid" id="bonus-container"></div>
+        <select id="pred-race-select" onchange="renderPredictions()"></select>
+        
+        <div id="preds-content">
+            </div>
     </div>
 
     <div id="general-tab" class="container hidden">
-        <table id="general-table">
-            <thead><tr><th>Поз.</th><th>Участник</th><th id="gen-races-head"></th><th style="text-align:right;">Общо Точки</th></tr></thead>
+        <table>
+            <thead><tr><th>Поз.</th><th>Участник</th><th style="text-align:right;">Общо Точки</th></tr></thead>
             <tbody id="general-body"></tbody>
         </table>
         <div style="height: 400px; margin-top: 40px;"><canvas id="mainChart"></canvas></div>
@@ -81,41 +75,93 @@
         async function fetchData() {
             try {
                 const [res1, res2] = await Promise.all([fetch(URL_RESULTS), fetch(URL_PREDS)]);
-                const text1 = await res1.text();
-                const text2 = await res2.text();
+                rawResults = parseCSV(await res1.text());
+                rawPreds = parseCSV(await res2.text());
                 
-                rawResults = parseCSV(text1);
-                rawPreds = parseCSV(text2);
-                
-                // Извличане на състезанията от хедъра на резултатите
-                races = [];
                 const header = rawResults[0];
-                for(let i=1; i < header.length; i+=2) {
-                    if(header[i]) races.push(header[i]);
-                }
+                for(let i=1; i < header.length; i+=2) { if(header[i]) races.push(header[i]); }
 
+                document.getElementById('loading').classList.add('hidden');
                 initApp();
-            } catch (e) { document.getElementById('loading').innerText = "Грешка при зареждането."; }
+            } catch (e) { document.getElementById('loading').innerText = "Грешка при връзката с Google Sheets."; }
         }
 
         function parseCSV(text) {
-            return text.split('\n').map(row => row.split(',').map(cell => cell.trim().replace(/"/g, '')));
+            return text.split('\n').map(row => {
+                // По-стабилно разделяне, което игнорира запетаи вътре в кавички
+                return row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || row.split(',').map(c => c.trim().replace(/"/g, ''));
+            });
         }
 
         function initApp() {
-            document.getElementById('loading').classList.add('hidden');
-            document.getElementById('race-results-tab').classList.remove('hidden');
-            
             const rSel = document.getElementById('select-race-results');
             const pSel = document.getElementById('pred-race-select');
             races.forEach(r => {
                 rSel.add(new Option("ГП на " + r, r));
                 pSel.add(new Option("ГП на " + r, r));
             });
-
+            showTab('race-results');
             renderRaceResults();
             renderGeneral();
             renderPredictions();
+        }
+
+        function cleanName(name) { 
+            if(!name) return "";
+            return name.split('(')[0].trim(); 
+        }
+
+        // --- ЛОГИКА ПРОГНОЗИ ---
+        function renderPredictions() {
+            const selectedRace = document.getElementById('pred-race-select').value.toLowerCase();
+            const content = document.getElementById('preds-content');
+            content.innerHTML = "";
+
+            const types = [
+                { id: "pre", label: "Предварителна прогноза", filter: "Предварителна" },
+                { id: "post", label: "Прогноза след квалификация", filter: "След квалификация" }
+            ];
+
+            types.forEach(type => {
+                const filteredRows = rawPreds.filter(row => 
+                    row[2] && row[2].toLowerCase().includes(selectedRace) && 
+                    row[3] && row[3].includes(type.filter)
+                );
+
+                if(filteredRows.length > 0) {
+                    let html = `<div class="section-title">${type.label}</div>`;
+                    html += `<div style="overflow-x:auto;"><table><thead><tr><th>Участник</th>`;
+                    for(let i=1; i<=10; i++) html += `<th>P${i}</th>`;
+                    html += `</tr></thead><tbody>`;
+
+                    let bonusCards = `<div class="bonus-grid">`;
+
+                    filteredRows.forEach(row => {
+                        html += `<tr><td style="font-weight:bold; color:var(--accent);">${row[1]}</td>`;
+                        // P1 до P10 са в колони 4, 6, 8... 22
+                        for(let i=4; i<=22; i+=2) {
+                            html += `<td>${cleanName(row[i])}</td>`;
+                        }
+                        html += `</tr>`;
+
+                        bonusCards += `
+                            <div class="bonus-card">
+                                <h4>${row[1]}</h4>
+                                <b>🌟 DotD:</b> ${cleanName(row[24])}<br>
+                                <b>💨 Fast Lap:</b> ${cleanName(row[28])}<br>
+                                <b>⚠️ DNF:</b> ${cleanName(row[26])}<br>
+                                <b>🚀 Bold:</b> ${cleanName(row[30])}
+                            </div>`;
+                    });
+
+                    html += `</tbody></table></div>` + bonusCards + `</div>`;
+                    content.innerHTML += html;
+                }
+            });
+
+            if(content.innerHTML === "") {
+                content.innerHTML = "<p style='text-align:center; padding:40px; color:#666;'>Няма открити прогнози за това състезание.</p>";
+            }
         }
 
         function renderRaceResults() {
@@ -133,7 +179,6 @@
                 results.push({ name: row[0], pre, qual, total: pre + qual });
             }
             results.sort((a,b) => b.total - a.total);
-            
             document.getElementById('res-title').innerText = "Гран При на " + race;
             document.getElementById('race-winner').innerText = results[0]?.name || "-";
 
@@ -142,56 +187,25 @@
             });
         }
 
-        function renderPredictions() {
-            const race = document.getElementById('pred-race-select').value;
-            const typeKey = document.getElementById('pred-type-select').value;
-            const body = document.getElementById('top10-body');
-            const bonus = document.getElementById('bonus-container');
-            
-            body.innerHTML = ""; bonus.innerHTML = "";
-            document.getElementById('top10-head').innerHTML = "<th>Участник</th>" + Array.from({length:10}, (_,i) => `<th>P${i+1}</th>`).join('');
-
-            rawPreds.slice(1).forEach(row => {
-                if(row[2]?.includes(race) && row[3]?.includes(typeKey)) {
-                    let top10Cells = "";
-                    for(let i=4; i<=22; i+=2) top10Cells += `<td>${row[i].split(' (')[0]}</td>`;
-                    body.innerHTML += `<tr><td style="font-weight:bold; color:var(--accent);">${row[1]}</td>${top10Cells}</tr>`;
-                    
-                    bonus.innerHTML += `
-                        <div class="bonus-card">
-                            <h4>${row[1]}</h4>
-                            <p>🌟 DotD: ${row[24].split(' (')[0]}</p>
-                            <p>💨 Fast Lap: ${row[28].split(' (')[0]}</p>
-                            <p>⚠️ DNF: ${row[26].split(' (')[0]}</p>
-                            <p>🚀 Bold: ${row[30].split(' (')[0]}</p>
-                        </div>`;
-                }
-            });
-        }
-
         function renderGeneral() {
             const body = document.getElementById('general-body');
             body.innerHTML = "";
-            let participantsData = [];
+            let dataForChart = [];
 
             for(let i=3; i < rawResults.length; i++) {
                 const row = rawResults[i];
                 if(!row[0]) continue;
-                let total = 0, racePoints = [];
+                let total = 0, history = [];
                 for(let j=1; j < row.length; j+=2) {
-                    let p = (parseInt(row[j]) || 0) + (parseInt(row[j+1]) || 0);
-                    total += p;
-                    racePoints.push(total);
+                    total += (parseInt(row[j]) || 0) + (parseInt(row[j+1]) || 0);
+                    history.push(total);
                 }
-                participantsData.push({ name: row[0], total, history: racePoints });
+                dataForChart.push({ name: row[0], total, history });
             }
-            participantsData.sort((a,b) => b.total - a.total);
-
-            participantsData.forEach((p, idx) => {
-                body.innerHTML += `<tr><td>${idx+1}</td><td>${p.name}</td><td>-</td><td style="text-align:right; font-weight:bold; color:var(--gold);">${p.total}</td></tr>`;
+            dataForChart.sort((a,b) => b.total - a.total).forEach((p, idx) => {
+                body.innerHTML += `<tr><td>${idx+1}</td><td style="font-weight:bold;">${p.name}</td><td style="text-align:right; font-weight:bold; color:var(--gold);">${p.total}</td></tr>`;
             });
-
-            initChart(participantsData);
+            initChart(dataForChart);
         }
 
         let chart;
@@ -202,20 +216,14 @@
                 type: 'line',
                 data: {
                     labels: ['Старт', ...races],
-                    datasets: data.map(p => ({
-                        label: p.name,
-                        data: [0, ...p.history],
-                        borderColor: getRandomColor(),
+                    datasets: data.map((p, i) => ({
+                        label: p.name, data: [0, ...p.history],
+                        borderColor: ['#e10600', '#00d2be', '#ffeb3b', '#ffffff', '#4a90e2'][i % 5],
                         tension: 0.3
                     }))
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: 'white' } } } }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: 'white' } } }, scales: { y: { ticks: { color: '#888' } }, x: { ticks: { color: '#888' } } } }
             });
-        }
-
-        function getRandomColor() {
-            const colors = ['#e10600', '#00d2be', '#ffeb3b', '#ffffff', '#4a90e2', '#7ed321'];
-            return colors[Math.floor(Math.random() * colors.length)];
         }
 
         function showTab(id) {
