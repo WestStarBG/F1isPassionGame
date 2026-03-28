@@ -75,7 +75,7 @@
         const URL_RESULTS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNZBr2YwzfMeeokxS1ZNAQUdaHJ7kQfBEhfYI0P59vtnCMHgsz3R5f8T7kz62q_K9zwmIXdkzzfoAL/pub?gid=1231783594&single=true&output=csv";
         const URL_PREDS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNZBr2YwzfMeeokxS1ZNAQUdaHJ7kQfBEhfYI0P59vtnCMHgsz3R5f8T7kz62q_K9zwmIXdkzzfoAL/pub?gid=1360122125&single=true&output=csv";
 
-        const flagMap = { "Австралия": "au", "Китай": "cn", "Япония": "jp", "Бахрейн": "bh", "Саудитска Арабия": "sa", "Маями": "us", "Канада": "ca", "Монако": "mc" };
+        const flagMap = { "Австралия": "au", "Китай": "cn", "Япония": "jp", "Бахрейн": "bh", "Саудитска Арабия": "sa", "Маями": "us" };
         let rawResults = [], rawPreds = [], races = [];
 
         async function fetchData() {
@@ -125,23 +125,39 @@
 
         function renderPredictions() {
             const selected = document.getElementById('pred-race-select').value;
-            const content = document.getElementById('preds-content'); content.innerHTML = "";
+            const content = document.getElementById('preds-content'); 
+            content.innerHTML = "";
+            
+            // Логика за заключване на Япония
+            const lockTime = new Date('2026-03-29T08:00:00');
+            const now = new Date();
+            const isLocked = (selected === "Япония" && now < lockTime);
+
             const types = [{ l: "📍 Предварителна прогноза", f: "Предварителна" }, { l: "🏁 Прогноза след квалификация", f: "квалификация" }];
 
             types.forEach(type => {
                 const filtered = rawPreds.filter(row => row[2]?.includes(selected) && row[3]?.includes(type.f));
                 if(filtered.length > 0) {
-                    let h = `<div class="section-title">${type.l}</div><div class="table-wrapper"><table><thead><tr><th>Участник</th>`;
-                    for(let i=1; i<=10; i++) h += `<th>P${i}</th>`;
-                    h += `</tr></thead><tbody>`;
-                    let cards = `<div class="bonus-grid">`;
-                    filtered.forEach(row => {
-                        h += `<tr><td style="font-weight:bold; color:var(--accent);">${row[1]}</td>`;
-                        for(let i=4; i<=22; i+=2) h += `<td>${(row[i]||"-").split('(')[0]}</td>`;
-                        h += `</tr>`;
-                        cards += `<div class="bonus-card"><h4>${row[1]}</h4><b>DotD:</b> ${row[24]||'-'}<br><b>Fast Lap:</b> ${row[28]||'-'}<br><b>DNF:</b> ${row[26]||'-'}<br><b>Bold:</b> ${row[30]||'-'}</div>`;
-                    });
-                    content.innerHTML += h + `</tbody></table></div>` + cards + `</div>`;
+                    let h = `<div class="section-title">${type.l}</div>`;
+                    
+                    if(isLocked) {
+                        h += `<div class="winner-box" style="border-left-color: var(--accent);">🔒 Прогнозите са скрити до неделя 08:00!</div><div class="bonus-grid">`;
+                        filtered.forEach(row => { h += `<div class="bonus-card"><h4>${row[1]}</h4>Статус: <b>Подадена ✔️</b></div>`; });
+                        h += `</div>`;
+                    } else {
+                        h += `<div class="table-wrapper"><table><thead><tr><th>Участник</th>`;
+                        for(let i=1; i<=10; i++) h += `<th>P${i}</th>`;
+                        h += `</tr></thead><tbody>`;
+                        let cards = `<div class="bonus-grid">`;
+                        filtered.forEach(row => {
+                            h += `<tr><td style="font-weight:bold; color:var(--accent);">${row[1]}</td>`;
+                            for(let i=4; i<=22; i+=2) h += `<td>${(row[i]||"-").split('(')[0]}</td>`;
+                            h += `</tr>`;
+                            cards += `<div class="bonus-card"><h4>${row[1]}</h4><b>DotD:</b> ${row[24]||'-'}<br><b>Fast Lap:</b> ${row[28]||'-'}<br><b>DNF:</b> ${row[26]||'-'}<br><b>Bold:</b> ${row[30]||'-'}</div>`;
+                        });
+                        h += `</tbody></table></div>` + cards + `</div>`;
+                    }
+                    content.innerHTML += h;
                 }
             });
         }
@@ -149,7 +165,6 @@
         function renderGeneral() {
             const body = document.getElementById('general-body'); body.innerHTML = "";
             let currentRanking = [], prevRanking = [];
-
             for(let i=3; i < rawResults.length; i++) {
                 let row = rawResults[i]; if(!row[0] || row[0] === "Участник") continue;
                 let total = 0, prevTotal = 0, history = [];
@@ -161,10 +176,8 @@
                 currentRanking.push({ n: row[0], t: total, h: history });
                 prevRanking.push({ n: row[0], t: prevTotal });
             }
-
             currentRanking.sort((a,b) => b.t - a.t);
             prevRanking.sort((a,b) => b.t - a.t);
-
             currentRanking.forEach((p, i) => {
                 let prevIdx = prevRanking.findIndex(pr => pr.n === p.n);
                 let diff = prevIdx - i;
